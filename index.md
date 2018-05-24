@@ -1,37 +1,245 @@
-## Welcome to GitHub Pages
+<!DOCTYPE html>
+<html>
+<head>
+<title>Simple Viewer provided by TheCubicle.US</title>
 
-You can use the [editor on GitHub](https://github.com/isopropylamine/Princeton-Fall-2016/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+<style>
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+select {
+	border: 0px;
+    outline: 0px;
+    font-size: 30px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    }
 
-### Markdown
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+#byte_content {
+    margin: 5px 0;
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
-```markdown
-Syntax highlighted code block
+h3 {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    text-align: center;
+}
 
-# Header 1
-## Header 2
-### Header 3
+#customers {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    table-layout: auto;
+    width: 96%;
+    margin-left:2%; 
+    margin-right:2%;
+}
 
-- Bulleted
-- List
+#customers td, #customers th {
+    border: 3px solid #000000;
+    padding: 20px;
+    
+}
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
-```
+#customers tr:hover {background-color: #ddd;}
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
+</style>
+</head>
+<body>
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/isopropylamine/Princeton-Fall-2016/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+</br>
 
-### Support or Contact
+<input type='file' id='fileinput'>
+<input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+
+
+</br>
+</br>
+</br>
+<h3> 
+<select name="Events/Groups" id="chooseEvent" onchange="loadSheet();">
+<option>Load competition .json file to start!</option>
+</select> 
+</h3>
+</br>
+</br>
+
+
+
+<table id="customers">
+  
+  <tr>
+    <td width="5%" align="center">1.</td>
+    <td id="Scramble1"></td>
+    <td width="30%">image</td>
+  </tr>
+  
+  <tr>
+    <td align="center">2.</td>
+    <td id="Scramble2"></td>
+    <td>image</td>
+  </tr>
+  
+  <tr>
+    <td align="center">3.</td>
+    <td id="Scramble3"></td>
+    <td>image</td>
+  </tr>
+  
+  <tr>
+    <td align="center">4.</td>
+    <td id="Scramble4"></td>
+    <td>image</td>
+  </tr>
+  
+  <tr>
+    <td align="center">5.</td>
+    <td id="Scramble5"></td>
+    <td>image</td>
+  </tr>
+  
+  
+  
+
+    
+  <tr>
+        <td align="left" colspan="3">Extra Scrambles:</td>
+  </tr>
+    
+ 
+  
+  <tr>
+    <td align="center">E1.</td>
+    <td id="ScrambleE1"></td>
+    <td>image</td>
+  </tr>
+  
+  <tr>
+    <td align="center">E2.</td>
+    <td id="ScrambleE2"></td>
+    <td>image</td>
+  </tr>
+
+</table>
+
+
+
+<div class="footer">
+<img src="https://i.imgur.com/YHONVBb.png" alt="Chris Tran made dis" style="width:300px;height:75px;" align="right">
+</div>
+
+
+
+
+<script>
+  var newArr;
+  var sheetCount;
+  var currentSheet = 0;
+  
+  
+
+  function loadFile() {
+    var input, file, fr;
+
+    if (typeof window.FileReader !== 'function') {
+      alert("The file API isn't supported on this browser yet.");
+      return;
+    }
+
+    input = document.getElementById('fileinput');
+    if (!input) {
+      alert("Um, couldn't find the fileinput element.");
+    }
+    else if (!input.files) {
+      alert("This browser doesn't seem to support the `files` property of file inputs.");
+    }
+    else if (!input.files[0]) {
+      alert("Please select a file before clicking 'Load'");
+    }
+    else {
+      file = input.files[0];
+      fr = new FileReader();
+      fr.onload = receivedText;
+      fr.readAsText(file);
+    }
+    
+
+    function receivedText(e) {
+      let lines = e.target.result;
+      newArr = JSON.parse(lines);
+      
+      var sheet = newArr.sheets[0];
+      sheetCount = newArr.sheets.length;
+      
+      
+      document.getElementById("Scramble1").innerHTML = sheet.scrambles[0];
+      document.getElementById("Scramble2").innerHTML = sheet.scrambles[1];
+      document.getElementById("Scramble3").innerHTML = sheet.scrambles[2];
+      document.getElementById("Scramble4").innerHTML = sheet.scrambles[3];
+      document.getElementById("Scramble5").innerHTML = sheet.scrambles[4];
+      
+      document.getElementById("ScrambleE1").innerHTML = sheet.extraScrambles[0];
+      document.getElementById("ScrambleE2").innerHTML = sheet.extraScrambles[1];
+      
+      var dropdown = document.getElementById("chooseEvent");
+      dropdown.options[0] = null;
+      
+      for ( var i =0; i < sheetCount; ++i){
+      	var iSheet = newArr.sheets[i];
+        var groupName = iSheet.title;
+      	dropdown[dropdown.length] = new Option(groupName, i);
+        	}
+    	}
+    
+    }
+    
+    
+    
+    
+    
+        
+    
+    function loadSheet(){
+        var sheetToLoad = document.getElementById("chooseEvent").value;
+        currentSheet = sheetToLoad;
+        var sheet = newArr.sheets[currentSheet];
+        
+        
+      	document.getElementById("Scramble1").innerHTML = sheet.scrambles[0];
+        document.getElementById("Scramble2").innerHTML = sheet.scrambles[1];
+        document.getElementById("Scramble3").innerHTML = sheet.scrambles[2];
+        document.getElementById("Scramble4").innerHTML = sheet.scrambles[3];
+        document.getElementById("Scramble5").innerHTML = sheet.scrambles[4];
+      
+        document.getElementById("ScrambleE1").innerHTML = sheet.extraScrambles[0];
+        document.getElementById("ScrambleE2").innerHTML = sheet.extraScrambles[1];
+    
+    }
+      
+    
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</script>
+</body>
+</html>
