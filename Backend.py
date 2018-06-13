@@ -1,5 +1,7 @@
 from flask import request
 from flask import Flask, jsonify
+from flask_cors import CORS
+import json
 import serial
 import os
 import time
@@ -10,53 +12,70 @@ import datetime
 
 
 
-queryCounter = 0
 
 app = Flask(__name__)
+CORS(app)
 @app.route('/', methods=['POST'])
 
 
 def create_task():
-    global queryCounter
-    task = (request.json["data"])
-    print(task)
-    #Incoming data is in the format, '{"data": [user, tasks, "deadline", "finishedStatus"]}'
-    #Time is in the format: "2018-06-12 19:59:03.327762"
-    #Tasks should be one long string, separated by commas.
-    #finishedStatus is either "True" or "False" only.
-
+    temp = request.get_json()
     connection = sqlite3.connect("project.db")
     cursor = connection.cursor()
+    print (temp)
+    incomingData = 0
+    outgoingData = 0
 
+    try:
+        incomingData = temp["data"]
+    except KeyError:
+        outgoingData = temp["request"]
 
-    command = """INSERT INTO main (queryNum, user, tasks, postingTime, deadline, finishedStatus)  VALUES ("{q}", "{u}", "{t}", "{p}", "{d}", "{f}");"""
-
-    #queryNum serves as an ID for each thing
-    
-    queryNum = str(queryCounter) 
-    user = str(incomingData[0]) 
-    tasks = incomingData[1]
-    postingTime = str(datetime.datetime.now())
-    deadline = str(incomingData[2])
-    finishedStatus = str(incomingData[3])
-
-
-    outgoingCommand = command.format( q = queryNum,
-                                      u = user,
-                                      t = tasks,
-                                      p = postingTime,
-                                      d = deadline,
-                                      f = finishedStatus)
-                                      
-
-    print (outgoingCommand)
-    cursor.execute(outgoingCommand)
-    queryCounter = queryCounter + 1
-    connection.commit()
-    connection.close()
 
     
-    return jsonify("thanks")
+    if incomingData is not 0:
+        #Incoming data is in the format, '{"data": [user, tasks, "deadline", "finishedStatus"]}'
+        #Time is in the format: "2018-06-12 22:06:13.109845"
+        #Tasks should be one long string, separated by commas.
+        #finishedStatus is either "True" or "False" only.
+
+        command = """INSERT INTO main (ID, user, tasks, postingTime, deadline, finishedStatus)  VALUES ("{q}", "{u}", "{t}", "{p}", "{d}", "{f}");"""
+ 
+        ID = str((incomingData[4])['taskID']) 
+        user = str((incomingData[0])['user']) 
+        tasks = (incomingData[1])['tasks']
+        postingTime = str(datetime.datetime.now())
+        deadline = str((incomingData[2])['deadline'])
+        finishedStatus = str((incomingData[3])['finishedStatus'])
+
+
+        outgoingCommand = command.format( q = ID,
+                                          u = user,
+                                          t = tasks,
+                                          p = postingTime,
+                                          d = deadline,
+                                          f = finishedStatus)
+                                          
+
+        cursor.execute(outgoingCommand)
+        connection.commit()
+        connection.close()
+
+        return jsonify(ID)
+
+    
+    if outgoingData is not 0:
+        print(outgoingData)
+        selection = """SELECT * FROM main WHERE ID={x};"""
+        outSelection = selection.format( x = outgoingData)
+        cursor.execute(outSelection)
+        output = cursor.fetchone()
+        print (output)
+
+        return jsonify(output)
+        
+
+        
 
 if __name__ == '__main__':
     app.run(debug=False)

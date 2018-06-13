@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>Test Page Demo</title>
+
+<style type="text/css">
+
+</style>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+var testDate = new Date();
+var taskID = Math.floor(Math.random() * 90000) + 10000;
+
+function incoming(){
+	$.ajax
+    ({
+        type: "POST",
+        url: 'http://127.0.0.1:5000/',
+        contentType: 'application/json',
+        async: false,
+        data: JSON.stringify({"request" : 70576}),
+        success: function (data) {
+        	document.getElementById("taskID").innerHTML = 'Task ID' + data[0];
+        	document.getElementById("userID").innerHTML = 'User ID: ' + data[1];
+        	document.getElementById("tasks").innerHTML = 'Tasks: ' + data[2];
+        	document.getElementById("postedTime").innerHTML = 'Time of posting: ' + data[3];
+        	document.getElementById("deadline").innerHTML = 'Deadline: ' + data[4];
+        	document.getElementById("finishedStatus").innerHTML = 'finished?' +data[5];
+
+        	//returns the data in the format( TaskID, UserID, TaskList, postingTime, deadlineTime, and finishedStatus)
+         
+        }
+    })
+
+}
+
+
+function outgoing(){
+    $.ajax
+    ({
+        type: "POST",
+        url: 'http://127.0.0.1:5000/',
+        contentType: 'application/json',
+        async: false,
+        data: JSON.stringify({"data" : [{"user":120}, {"tasks":"Eat food, drink water, wait to die"}, {"deadline": testDate }, {"finishedStatus": "False"}, {"taskID": taskID }]}),
+        success: function (data) {
+        	document.getElementById("outgo").innerHTML = "TaskID: " + data;
+        alert("Successfully posted to database!!"); 
+        }
+    })
+}
+
+
+
+</script>
+</head>
+<body>
+
+
+<input type='button' value = "incoming" onclick='incoming();'>
+<input type='button' value = "outgoing" onclick='outgoing();'>
+
+<h3 id = 'outgo'> Outgoing Data: </h3>
+<h3 id = 'taskID'> Tasks: </h3>
+<h3 id = 'userID'> UserID: </h3>
+<h3 id = 'tasks'> Tasks: </h3>
+<h3 id = 'postedTime'> Time of Posting: </h3>
+<h3 id = 'deadline'> Deadline: </h3>
+<h3 id = 'finishedStatus'> Finished? </h3>
+
+</body>
+</html>
